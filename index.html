@@ -39,7 +39,7 @@
             }
 
             .h4 {
-                font-size: 20px;
+                font-size: 2vh;
             }
     
             .clockwork {
@@ -165,6 +165,13 @@
                 transform: scaleX(1);
                 text-decoration: none;
             }
+
+            .card-title {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: space-between;
+            }
     
         </style>
     </header>
@@ -204,11 +211,8 @@
             </vstack>
             <div class="box maintext" style="--c:gainsboro;--w:33%;--b:0.2rem;--h:50%;">
                 <p class="maintextsection">
-                    <strong>Fridolin Karger.</strong> Programmierer. Mensch. Mythos. Meistens pünktlich.<br>
-                    Lösungen auf innovative und unkonventionelle Art und Weise.
-                    Eine Website über Musik, Programmieren
-                    und Blogging, manchmal Bücher? Wo gibts denn sowas noch? Es lohnt sich reinzulesen.<br>
-                    Featuring: Sporadische Updates, Halbfertige Projekte, Einfache Poesie & eventuell mehr
+                    <strong>Fridolin Karger.</strong> Of whom this site is of. If you are reading here, your time is better spent elsewhere.<br>
+                    Or not. Depends. Featuring goofy css and half backed html tags this website present a variety of code & opinions.
                     <br><br><span style="font-family: monospace;">[Momentan auf Reisen]</span>
                 </p>
             </div>
@@ -218,8 +222,11 @@
                     <div class="outer">
                     <div class="card">
                         <div class="info">
-                        <h3 class="title">Title 1</h3>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. </p>
+                            <div class="card-title">
+                                <h3 class="title">Title 1</h3>
+                                <p>03.10.2004</p>
+                            </div>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. </p>
                         </div>
                     </div>
                     <div class="card">
