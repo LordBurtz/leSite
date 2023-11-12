@@ -1,0 +1,108 @@
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric #-}
+
+import Web.Scotty
+import Database.SQLite.Simple
+import Database.SQLite.Simple.FromRow
+import Data.Aeson (FromJSON, ToJSON, object, (.=), encode)
+import Data.Time.Clock
+import Data.Text.Lazy.IO as TLIO
+
+import GHC.Generics
+import Data.Text.Lazy (Text)
+import qualified Data.Text.Internal.Builder as TLIO
+import Data.Text.Lazy.Builder
+
+import Control.Monad.IO.Class (liftIO)
+
+-- Define a Post data type for database operations
+data Post = Post { postId :: Int, postTitle :: String, postContent :: String, postTimestamp :: UTCTime }
+  deriving (Show, Generic)
+
+instance FromRow Post
+
+instance ToJSON Post
+
+main :: IO ()
+main = do
+  -- Open a connection to the SQLite database
+  conn <- open "posts.db"
+
+  -- Create the 'posts' table if it doesn't exist
+  execute_ conn "CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY, title TEXT, content TEXT, timestamp TIMESTAMP)"
+
+  -- Start the Scotty web server
+  scotty 3000 $ do
+    get "/" helloHaskellHandler
+    get "/:id" (postIdParamHandler conn)
+    post "/newpost" (newPostHandler conn)
+    get "/all" (getAllPostsHandler conn)
+    get "/renderAndSaveAll" (renderAndSaveAllPostsHandler conn)
+
+  -- Close the database connection
+  close conn
+
+-- Route Handlers
+
+helloHaskellHandler :: ActionM ()
+helloHaskellHandler = text "Hello Haskell"
+
+postIdParamHandler :: Connection -> ActionM ()
+postIdParamHandler conn = do
+  postId <- param "id"
+  post <- liftIO $ getPostById conn postId
+  json post
+
+newPostHandler :: Connection -> ActionM ()
+newPostHandler conn = do
+  newPost <- jsonData :: ActionM Post
+  timestamp <- liftIO getCurrentTime
+  let postWithTimestamp = newPost { postTimestamp = timestamp }
+  postId <- liftIO $ insertPost conn postWithTimestamp
+  json $ object ["id" .= postId]
+
+getAllPostsHandler :: Connection -> ActionM ()
+getAllPostsHandler conn = do
+  posts <- liftIO $ getAllPosts conn
+  json posts
+
+renderAndSaveAllPostsHandler :: Connection -> ActionM ()
+renderAndSaveAllPostsHandler conn = do
+  posts <- liftIO $ getAllPosts conn
+  liftIO $ mapM_ (renderAndSavePostToFile conn) posts
+  text "Posts rendered and saved to HTML files."
+
+-- Additional Function
+
+renderAndSavePostToFile :: Connection -> Post -> IO ()
+renderAndSavePostToFile conn post = do
+  let fileName = postTitle post ++ ".html"
+      htmlContent = renderPostToHtml post
+  TLIO.writeFile fileName htmlContent
+
+renderPostToHtml :: Post -> Text
+renderPostToHtml post =
+  toLazyText $ mconcat
+    [ "<html><head><title>", postTitle post, "</title></head><body>"
+    , "<h1>", postTitle post, "</h1>"
+    , "<p>", postContent post, "</p>"
+    , "<p>Timestamp: ", show (postTimestamp post), "</p>"
+    , "</body></html>"
+    ]
+
+-- Database Operations
+
+getPostById :: Connection -> Int -> IO (Maybe Post)
+getPostById conn postId = do
+  result <- query conn "SELECT * FROM posts WHERE id = ?" (Only postId) :: IO [Post]
+  return $ case result of
+    [post] -> Just post
+    _      -> Nothing
+
+insertPost :: Connection -> Post -> IO Int
+insertPost conn post = do
+  execute conn "INSERT INTO posts (title, content, timestamp) VALUES (?, ?, ?)" (postTitle post, postContent post, postTimestamp post)
+  fromIntegral <$> lastInsertRowId conn
+
+getAllPosts :: Connection -> IO [Post]
+getAllPosts conn = query_ conn "SELECT * FROM posts"
