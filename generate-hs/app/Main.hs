@@ -4,14 +4,13 @@ module Main where
 
 import Web.Scotty
 import Data.Aeson (FromJSON, ToJSON, object, (.=), decode, encode)
-import Data.Time.Clock
-import GHC.Generics
+import Data.Time.Clock ( getCurrentTime )
 import Control.Monad.IO.Class (liftIO)
 import Data.Maybe (Maybe)
 
 -- owned
 import Repository
-import HtmlGen
+import HtmlGen ( patchIndexWith )
 import Structure ( Post(..))
 
 instance ToJSON Post
@@ -43,7 +42,7 @@ fileHandler = file
 
 postIdParamHandler :: Repository -> ActionM ()
 postIdParamHandler repo = do
-  postId <- param "id"
+  postId <- captureParam "id"
   post <- liftIO $ getPostById repo postId
   json post
 
