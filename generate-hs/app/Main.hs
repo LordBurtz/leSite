@@ -1,83 +1,72 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE DeriveGeneric #-}
+
+module Main where
 
 import Web.Scotty
-import Database.SQLite.Simple
-import Database.SQLite.Simple.FromRow
 import Data.Aeson (FromJSON, ToJSON, object, (.=), decode, encode)
 import Data.Time.Clock
 import GHC.Generics
-
 import Control.Monad.IO.Class (liftIO)
 import Data.Maybe (Maybe)
 
--- Define a Post data type for database operations
-data Post = Post { 
-    id :: Int, 
-    title :: String, 
-    content :: String, 
-    timestamp :: Maybe UTCTime 
-  } deriving (Show, Generic)
+-- owned
+import Repository
+import HtmlGen
+import Structure ( Post(..))
 
-instance FromRow Post
 instance ToJSON Post
 instance FromJSON Post
 
 main :: IO ()
 main = do
-  -- Open a connection to the SQLite database
-  conn <- open "posts.db"
+  repository <- initializeRepository
 
-  -- Create the 'posts' table if it doesn't exist
-  execute_ conn "CREATE TABLE IF NOT EXISTS posts (id INTEGER PRIMARY KEY, title TEXT, content TEXT, timestamp TIMESTAMP)"
+  scotty 3000 $
+    get "/" helloHaskellHandler >>
+    get "/site-logo.png" (fileHandler "site-logo.png") >>
+    get "/pylon.css" (fileHandler "pylon.css") >>
+    get "/:id" (postIdParamHandler repository) >>
+    post "/newpost" (newPostHandler repository) >>
+    get "/all" (getAllPostsHandler repository) >>
+    post "/regenerate" (regenerateHandler repository) >>
+    delete "/post" (deletePostHandler repository)
 
-  -- Start the Scotty web server
-  scotty 3000 $ 
-    get "/" helloHaskellHandler >> 
-    get "/:id" (postIdParamHandler conn) >> 
-    post "/newpost"  (newPostHandler conn) >> 
-    get "/all"  (getAllPostsHandler conn) 
+  closeRepository repository
 
-  -- Close the database connection
-  close conn
 
 -- Route Handlers
-
 helloHaskellHandler :: ActionM ()
-helloHaskellHandler = text "Hello Haskell"
+helloHaskellHandler = file "index-u.html"
 
-postIdParamHandler :: Connection -> ActionM ()
-postIdParamHandler conn = do
+fileHandler :: FilePath -> ActionM ()
+fileHandler = file
+
+postIdParamHandler :: Repository -> ActionM ()
+postIdParamHandler repo = do
   postId <- param "id"
-  post <- liftIO $ getPostById conn postId
+  post <- liftIO $ getPostById repo postId
   json post
 
-newPostHandler :: Connection -> ActionM ()
-newPostHandler conn = do
+newPostHandler :: Repository -> ActionM ()
+newPostHandler repo = do
   newPost <- jsonData :: ActionM Post
   timestamp <- liftIO getCurrentTime
   let postWithTimestamp = newPost { timestamp = Just timestamp }
-  postId <- liftIO $ insertPost conn postWithTimestamp
+  postId <- liftIO $ insertPost repo postWithTimestamp
   json $ object ["id" .= postId]
 
-getAllPostsHandler :: Connection -> ActionM ()
-getAllPostsHandler conn = do
-  posts <- liftIO $ getAllPosts conn
+getAllPostsHandler :: Repository -> ActionM ()
+getAllPostsHandler repo = do
+  posts <- liftIO $ getAllPosts repo
   json posts
 
--- Database Operations
+regenerateHandler :: Repository -> ActionM ()
+regenerateHandler repo = do
+  posts <- liftIO $ getAllPublicPosts repo
+  liftIO $ patchIndexWith posts
+  file "index-u.html"
 
-getPostById :: Connection -> Int -> IO (Maybe Post)
-getPostById conn postId = do
-  result <- query conn "SELECT * FROM posts WHERE id = ?" (Only postId) :: IO [Post]
-  return $ case result of
-    [post] -> Just post
-    _      -> Nothing
-
-insertPost :: Connection -> Post -> IO Int
-insertPost conn post = do
-  execute conn "INSERT INTO posts (title, content, timestamp) VALUES (?, ?, ?)" (title post, content post, timestamp post)
-  fromIntegral <$> lastInsertRowId conn
-
-getAllPosts :: Connection -> IO [Post]
-getAllPosts conn = query_ conn "SELECT * FROM posts"
+deletePostHandler :: Repository -> ActionM ()
+deletePostHandler repo = do
+  id <- queryParam "id"
+  liftIO $ setToPrivate repo id

@@ -22,7 +22,9 @@ maintainer:         fridolin.karger@check24.de
 extra-source-files: CHANGELOG.md
 
 executable generate-hs
-    main-is:          Html-generation.hs
+    main-is:          Main.hs
+
+    other-modules:    Structure, Repository, HtmlGen
 
     -- Modules included in this executable, other than Main.
     -- other-modules:
@@ -31,15 +33,14 @@ executable generate-hs
     -- other-extensions:
     build-depends:    
         base ^>=4.17.2.0,
+        sqlite-simple ^>=0.4.18.2,
         scotty,
-        sqlite-simple,
         aeson,
         time,
         text,
         blaze-html,
-        blaze-markup
-        
-
+        blaze-markup,
+        markdown
 
     hs-source-dirs:   app
     default-language: Haskell2010

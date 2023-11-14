@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+    <header>
+        <style>
+            .header {
+                padding: 2vh;
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: space-between;
+            }
+    
+            .entry {
+                padding-left: 5px;
+                padding-right: 5px;
+            }
+    
+            body {
+                background-color: rgba(30,31,33,255);
+                color: gainsboro;    
+                font-family: Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif;
+    
+            }
+
+            .footer {
+                padding: 2vh;
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: space-between;
+            }
+    
+            .h1 {
+                font-size: 15vh;
+            }
+    
+            .h3 {
+                font-size: 3vh;
+            }
+
+            .h4 {
+                font-size: 2vh;
+            }
+    
+            .clockwork {
+                padding: 2vh;
+            }
+    
+            .clock {
+                margin-top: 5vh;
+                margin-bottom: 5vh;
+            }
+    
+            /* Timeline Container */
+            .timeline {
+                margin: 20px auto;
+                padding: 20px;
+            }
+    
+            /* Outer Layer with the timeline border */
+            .outer {
+                border-left: 2px solid #333;
+            }
+    
+            /* Card container */
+            .card {
+                position: relative;
+                margin: 0 0 20px 20px;
+                padding: 10px;
+                background: #333;
+                color: gray;
+                border-radius: 8px;
+                max-width: 50vw;
+            }
+    
+            /* Information about the timeline */
+            .info {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+    
+            /* Title of the card */
+            .title {
+                color: gainsboro;
+                position: relative;
+            }
+    
+            /* Timeline dot  */
+            .title::before {
+                content: "";
+                position: absolute;
+                width: 10px;
+                height: 10px;
+                background: gainsboro;
+                border-radius: 999px;
+                left: -39px;
+                border: 3px solid gainsboro;
+            }
+    
+            .box {
+                --b: 5px;   /* thickness of the border */
+                --c: red;   /* color of the border */
+                --w: 20px;  /* top / bottom length --> width of border */
+                --h: var(--w); /* right / left length -> height of border */
+                
+    
+                border: var(--b) solid #0000; /* space for the border */
+                --_g: #0000 90deg,var(--c) 0;
+                --_p: var(--w) var(--h) border-box no-repeat;
+                background:
+                    conic-gradient(from 90deg  at top    var(--b) left  var(--b),var(--_g)) 0    0    / var(--_p),
+                    /*conic-gradient(from 180deg at top    var(--b) right var(--b),var(--_g)) 100% 0    / var(--_p),
+                    /*conic-gradient(from 0deg   at bottom var(--b) left  var(--b),var(--_g)) 0    100% / var(--_p), */
+                    conic-gradient(from -90deg at bottom var(--b) right var(--b),var(--_g)) 100% 100% / var(--_p);
+            }
+    
+            .maintext {
+                margin: auto;
+                max-width: 60vw;
+                display:table-cell;
+                vertical-align:middle;
+            }
+    
+            .maintextsection {
+                padding: 1.5% 3%;
+                font-size: large;
+                line-height: 1.2em;
+            }
+
+            a {
+                color: inherit;
+                text-decoration: underline;
+                position: relative;
+            }
+
+            a:hover {
+                text-decoration: underline;
+                color: #FFF;
+            }
+
+            a::before {
+                content: "";
+                position: absolute;
+                display: block;
+                width: 100%;
+                height: 2px;
+                bottom: 0;
+                left: 0;
+                background-color: #FFF;
+                transform: scaleX(0);
+                transition: transform 0.3s ease;
+                text-decoration: none;
+            }
+
+            a:hover::before {
+                transform: scaleX(1);
+            }
+
+            .link {
+                color: inherit;
+                text-decoration: none;
+            }
+
+            .link:hover {
+                text-decoration: underline;
+            }
+
+            .link {
+                position: relative;
+                text-decoration: none;
+            }
+            
+            .link:hover {
+                color: #FFF;
+                text-decoration: none;
+            }
+
+            .link::before {
+                content: "";
+                position: absolute;
+                display: block;
+                width: 100%;
+                height: 2px;
+                bottom: 0;
+                left: 0;
+                background-color: #FFF;
+                transform: scaleX(0);
+                transition: transform 0.3s ease;
+                text-decoration: none;
+            }
+
+            .link:hover::before {
+                transform: scaleX(1);
+                text-decoration: none;
+            }
+
+            .card-title {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: space-between;
+            }
+    
+        </style>
+    </header>
+    <body>
+        <vstack class="body" align-x=center align-y=center>
+            <hstack class="header">
+                <img src="site-logo.png" alt="logo" style="max-height: 10vh;">
+                <hstack class="entries">
+                    <a class="entry link h4" href="https://fundur.systems" target="_blank" rel="noopener">Github</a>
+                    <a class="entry link h4" href="https://fundur.systems" target="_blank" rel="noopener">discord</a>
+                    <a class="entry link h4" href="https://fundur.systems" target="_blank" rel="noopener">poetry</a>
+                    <a class="entry link h4" href="https://fundur.systems" target="_blank" rel="noopener">other</a>
+                </hstack>
+            </hstack>
+            <vstack stretch align-x=center align-y=center class="clock">
+                <span class="h3 clockwork" id="date">Wednesday, 1th November 2023</span>
+                <script type="text/javascript" charset="utf-8">
+                    let d = new Date();
+                    const mN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                    const dN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+                    let date = " " + dN[d.getDay()] + ", " + d.getDate() + "th " + mN[d.getMonth()] + " " + d.getFullYear()
+                    document.getElementById('date').innerHTML = date;
+                </script>
+                <span class="h1 clockwork" id="time">12:45</span>
+                <span class="h3 clockwork">Long days, pleasant nights</span>
+                <script type="text/javascript" charset="utf-8">
+                    let a;
+                    let time;
+                    let updater = () => {
+                    a = new Date();
+                    time = ('0' + a.getHours()).slice(-2) + ':' + ('0' + a.getMinutes()).slice(-2);
+                    document.getElementById('time').innerHTML = time;
+                    };
+                    updater();
+                    setInterval(updater, 1000);
+                </script>
+            </vstack>
+            <div class="box maintext" style="--c:gainsboro;--w:33%;--b:0.2rem;--h:50%;">
+                <p class="maintextsection">
+                    <strong>Fridolin Karger.</strong> Of whom this site is of. If you are reading this, your time is better spent elsewhere.<br>
+                    Or not. Depends. Featuring goofy css and half backed html tags this website present a variety of code & opinions.
+                    <br><br><span style="font-family: monospace;">[Momentan auf Reisen]</span>
+                </p>
+            </div>
+            <div style="height: 5vh;"></div>
+            <vstack>
+                <!-- placeholder -->
+            </vstack>
+            <hstack class="footer">
+                <p>Powered by Fundur</p>
+                <p>© Fridolin Karger 2023</p>
+            </hstack>
+        </vstack>
+        <link rel="stylesheet" href="pylon.css">
+    </body>
+</html>
