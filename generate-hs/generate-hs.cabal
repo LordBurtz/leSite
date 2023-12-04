@@ -40,7 +40,20 @@ executable generate-hs
         text,
         blaze-html,
         blaze-markup,
-        markdown
+        markdown,
+        hspec
 
     hs-source-dirs:   app
     default-language: Haskell2010
+
+test-suite test
+  type:                exitcode-stdio-1.0
+  main-is:             Sepc.hs
+  build-depends:       base
+                     , time
+                     , text
+                     , hspec
+                     , HDBC
+                     , HDBC-sqlite3
+  hs-source-dirs:      test
+  default-language:    Haskell2010
