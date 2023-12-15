@@ -6,11 +6,12 @@ module HtmlGen(
   patchIndexWith
 ) where
 
-import Text.Blaze.Html5 as H hiding (title)
-import Text.Blaze.Html5.Attributes as A hiding (title, content)
+import Text.Blaze.Html5 as H hiding (title, link)
+import Text.Blaze.Html5.Attributes as A hiding (title, content, link)
 import Text.Blaze.Html.Renderer.String (renderHtml)
 import Data.Time.Clock
 import Data.Function
+import Data.Maybe
 import Data.Time (formatTime, defaultTimeLocale)
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
@@ -43,7 +44,7 @@ postToHtml post =
             H.h3 ! htmlclass "title" $ toHtml $ title post
             H.p ! htmlclass "timestamp" $ maybe mempty toHtml (formatUTCTime $ timestamp post)
         toHtml (markdownToHtml $ TL.pack $ content post) ! htmlclass "content"
-        H.a ! htmlclass "link" ! A.style "width: 3.5rem;" ! A.href "http://example.com" $ "Red pill"
+        H.a ! htmlclass "link" ! A.style "width: 3.5rem;" ! A.href (fromMaybe ""  (fmap toValue (link post))) $ "le link"
 
 -- Function to generate HTML for a list of posts and wrap them in a div with id "posts"
 postsToHtml :: [Post] -> Html
